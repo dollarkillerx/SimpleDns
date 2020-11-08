@@ -1,25 +1,38 @@
 package config
 
 import (
-	"encoding/json"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Conf struct {
-	DNSServer  string `json:"dns_server"`
-	ListenAddr string `json:"local_addr"`
+	DNSServer  string `yaml:"DNSServer"`
+	ListenAddr string `yaml:"ListenAddr"`
+	Debug      bool   `yaml:"Debug"`
 }
 
 func ConfInit() *Conf {
 	var conf Conf
-	file, err := ioutil.ReadFile("./configs/config.yaml")
+	file, err := ioutil.ReadFile("./config.yaml")
 	if err != nil {
-		log.Fatalln(err)
+		create, err := os.Create("./config.yaml")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer create.Close()
+		create.WriteString(base)
+		log.Fatalln("NOT CONFIG")
 	}
 
-	if err := json.Unmarshal(file, &conf); err != nil {
+	if err := yaml.Unmarshal(file, &conf); err != nil {
 		log.Fatalln(err)
 	}
 	return &conf
 }
+
+var base = `
+DNSServer: "223.5.5.5:53"
+ListenAddr: "0.0.0.0:53"
+Debug: false`

@@ -15,7 +15,7 @@ type Stele struct {
 }
 
 func New() storage.Interface {
-	stele, err := stele.NewLocal("./stele")
+	stele, err := stele.NewLocal("./stele_data")
 	if err != nil {
 		log.Fatalln(err)
 	}

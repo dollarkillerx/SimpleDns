@@ -8,3 +8,7 @@ routing_table.csv
 domain,ip
 domain,ip
 ```
+
+
+### runing
+`go build cmd/simple_dns/simple_dns.go`

@@ -15,9 +15,10 @@ type SimpleDns struct {
 	storage storage.Interface
 }
 
-func New(conf *config.Conf) *SimpleDns {
+func New(conf *config.Conf, storage storage.Interface) *SimpleDns {
 	sim := &SimpleDns{
-		conf: conf,
+		conf:    conf,
+		storage: storage,
 	}
 
 	return sim
@@ -45,6 +46,12 @@ func (s *SimpleDns) Run() error {
 }
 
 func (s *SimpleDns) core(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
+
 	var msg easy_dns.Message
 	if err := msg.Unpack(data); err != nil {
 		log.Println(err)
@@ -75,7 +82,7 @@ func (s *SimpleDns) core(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 	// 检测本地路由表
 	// 检测缓存
 	dns, err := s.storage.QueryDns(msg.Questions[0].Name.String(), msg.Questions[0].Type)
-	if err != nil {
+	if err == nil {
 		msg.Header.Response = true
 		msg.Answers = dns
 
@@ -91,6 +98,7 @@ func (s *SimpleDns) core(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 
 		return
 	}
+
 	// 发起DNS拨号
 	dnsResp, err := s.dialDns(data)
 	if err != nil {
@@ -108,7 +116,7 @@ func (s *SimpleDns) core(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {
 	}
 
 	// storage
-	if err := s.storage.StorageDns(msg.Questions[0].Name.String(), msg.Questions[0].Type, dnsResp, msg.Answers[0].Header.TTL); err != nil {
+	if err := s.storage.StorageDns(msg.Questions[0].Name.String(), msg.Questions[0].Type, dnsResp, dnsResp.Answers[0].Header.TTL); err != nil {
 		log.Println(err)
 	}
 }
