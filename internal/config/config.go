@@ -8,9 +8,11 @@ import (
 )
 
 type Conf struct {
-	DNSServer  string `yaml:"DNSServer"`
-	ListenAddr string `yaml:"ListenAddr"`
-	Debug      bool   `yaml:"Debug"`
+	DNSServer     string `yaml:"DNSServer"`
+	Token         string `yaml:"Token"`
+	DNSListenAddr string `yaml:"DNSListenAddr"`
+	ApiListenAddr string `yaml:"ApiListenAddr"`
+	Debug         bool   `yaml:"Debug"`
 }
 
 func ConfInit() *Conf {
@@ -34,5 +36,5 @@ func ConfInit() *Conf {
 
 var base = `
 DNSServer: "223.5.5.5:53"
-ListenAddr: "0.0.0.0:53"
+DNSListenAddr: "0.0.0.0:53"
 Debug: false`

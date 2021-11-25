@@ -16,10 +16,10 @@ func main() {
 	}
 
 	stele := stele.New()
-	dns := server.New(cfg, stele)
-	routing.New(stele)
+	r := routing.New(stele)
+	dns := server.New(cfg, stele, r)
 
-	log.Printf("Run In: %s \n", cfg.ListenAddr)
+	log.Printf("Run In: %s \n", cfg.DNSListenAddr)
 	if err := dns.Run(); err != nil {
 		log.Fatalln(err)
 	}

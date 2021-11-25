@@ -6,26 +6,40 @@ import (
 	"time"
 
 	"github.com/dollarkillerx/SimpleDns/internal/config"
+	"github.com/dollarkillerx/SimpleDns/internal/routing"
 	"github.com/dollarkillerx/SimpleDns/internal/storage"
 	"github.com/dollarkillerx/easy_dns"
+	"github.com/gin-gonic/gin"
 )
 
 type SimpleDns struct {
 	conf    *config.Conf
 	storage storage.Interface
+	r       *routing.Routing
+	app     *gin.Engine
 }
 
-func New(conf *config.Conf, storage storage.Interface) *SimpleDns {
+func New(conf *config.Conf, storage storage.Interface, r *routing.Routing) *SimpleDns {
+	app := gin.New()
+	app.Use(gin.Recovery())
+	if conf.Debug {
+		app.Use(gin.Logger())
+	}
+
 	sim := &SimpleDns{
 		conf:    conf,
 		storage: storage,
+		r:       r,
+		app:     app,
 	}
 
 	return sim
 }
 
 func (s *SimpleDns) Run() error {
-	addr, err := net.ResolveUDPAddr("udp", s.conf.ListenAddr)
+	s.api()
+
+	addr, err := net.ResolveUDPAddr("udp", s.conf.DNSListenAddr)
 	if err != nil {
 		return err
 	}

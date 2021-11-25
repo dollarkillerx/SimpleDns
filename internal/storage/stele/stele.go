@@ -2,6 +2,7 @@ package stele
 
 import (
 	"fmt"
+	"github.com/dollarkillerx/SimpleDns/pkg/model"
 	"log"
 	"time"
 
@@ -57,5 +58,21 @@ func (s *Stele) DeleteDns(domain string, queryType easy_dns.Type) error {
 }
 
 func (s *Stele) getKey(domain string, queryType easy_dns.Type) []byte {
-	return []byte(fmt.Sprintf("%s_%d", domain, queryType))
+	return []byte(fmt.Sprintf("dns_%s_%d", domain, queryType))
+}
+
+func (s *Stele) APIStorageDns(domain string, model *model.DnsModel) error {
+	return nil
+}
+
+func (s *Stele) APIDeleteDns(id string) error {
+	return nil
+}
+
+func (s *Stele) APIUpdateDns(id string, model *model.DnsModel) error {
+	return nil
+}
+
+func (s *Stele) APIListDns() ([]model.DnsModel, error) {
+	return nil, nil
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/dollarkillerx/easy_dns"
 )
 
-// 热更新 路由表
+// Routing 热更新 路由表
 type Routing struct {
 	mu sync.Mutex
 
@@ -32,7 +32,7 @@ func New(storage storage.Interface) *Routing {
 	}
 
 	sto.update()
-	go sto.core()
+	go sto.updateRoutingTable()
 	return sto
 }
 
@@ -100,7 +100,7 @@ func (r *Routing) iPToAResource(ip string) (*easy_dns.AResource, error) {
 	return &easy_dns.AResource{A: a}, nil
 }
 
-func (r *Routing) core() {
+func (r *Routing) updateRoutingTable() {
 	for {
 		time.Sleep(time.Millisecond * 250)
 		file, err := ioutil.ReadFile("./routing_table.csv")

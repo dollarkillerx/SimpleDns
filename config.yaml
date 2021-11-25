@@ -1,4 +1,4 @@
 
 DNSServer: "223.5.5.5:53"
-ListenAddr: "0.0.0.0:53"
+ListenAddr: "0.0.0.0:6060"
 Debug: false
