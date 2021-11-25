@@ -6,6 +6,8 @@ import (
 	"github.com/dollarkillerx/SimpleDns/pkg/model"
 	"github.com/rs/xid"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dollarkillerx/SimpleDns/internal/storage"
@@ -77,7 +79,38 @@ func (s *Stele) APIStorageDns(domain string, model *model.DnsModel) error {
 		return err
 	}
 
-	return s.stele.Set(s.getKey(model.Domain+".", model.QueryType), marshal, 0)
+	if model.TTL <= 0 {
+		model.TTL = 50
+	}
+
+	resource, err := iPToAResource(model.Addr)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	msg := &easy_dns.Message{
+		Answers: []easy_dns.Resource{
+			{
+				Header: easy_dns.ResourceHeader{
+					Name:   easy_dns.MustNewName(domain + "."),
+					Type:   model.QueryType,
+					Class:  easy_dns.ClassINET,
+					TTL:    uint32(model.TTL),
+					Length: 4,
+				},
+				Body: resource,
+			},
+		},
+	}
+
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return s.stele.Set(s.getKey(model.Domain+".", model.QueryType), bytes, 0)
 }
 
 func (s *Stele) APIDeleteDns(id string) error {
@@ -116,7 +149,34 @@ func (s *Stele) APIUpdateDns(id string, model *model.DnsModel) error {
 		return err
 	}
 
-	return s.stele.Set(s.getKey(model.Domain+".", model.QueryType), marshal, 0)
+	resource, err := iPToAResource(model.Addr)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	msg := &easy_dns.Message{
+		Answers: []easy_dns.Resource{
+			{
+				Header: easy_dns.ResourceHeader{
+					Name:   easy_dns.MustNewName(model.Domain + "."),
+					Type:   model.QueryType,
+					Class:  easy_dns.ClassINET,
+					TTL:    uint32(model.TTL),
+					Length: 4,
+				},
+				Body: resource,
+			},
+		},
+	}
+
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return s.stele.Set(s.getKey(model.Domain+".", model.QueryType), bytes, 0)
 }
 
 func (s *Stele) APIListDns() ([]model.DnsModel, error) {
@@ -145,4 +205,22 @@ func (s *Stele) APIListDns() ([]model.DnsModel, error) {
 
 func getApiID(id string) string {
 	return fmt.Sprintf("api_dns.%s", id)
+}
+
+func iPToAResource(ip string) (*easy_dns.AResource, error) {
+	split := strings.Split(ip, ".")
+	if len(split) != 4 {
+		return nil, fmt.Errorf("Nof")
+	}
+
+	var a [4]byte
+	for k, v := range split {
+		atoi, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, err
+		}
+		a[k] = uint8(atoi)
+	}
+
+	return &easy_dns.AResource{A: a}, nil
 }
