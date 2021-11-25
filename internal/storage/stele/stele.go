@@ -1,8 +1,10 @@
 package stele
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/dollarkillerx/SimpleDns/pkg/model"
+	"github.com/rs/xid"
 	"log"
 	"time"
 
@@ -62,17 +64,85 @@ func (s *Stele) getKey(domain string, queryType easy_dns.Type) []byte {
 }
 
 func (s *Stele) APIStorageDns(domain string, model *model.DnsModel) error {
-	return nil
+	xid := xid.New().String()
+	marshal, err := json.Marshal(model)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = s.stele.Set([]byte(getApiID(xid)), marshal, 0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return s.stele.Set(s.getKey(model.Domain+".", model.QueryType), marshal, 0)
 }
 
 func (s *Stele) APIDeleteDns(id string) error {
-	return nil
+	nodeByte, err := s.stele.Get([]byte(getApiID(id)))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	var mod model.DnsModel
+	err = json.Unmarshal(nodeByte, &mod)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = s.stele.Delete([]byte(getApiID(id)))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return s.stele.Delete(s.getKey(mod.Domain+".", mod.QueryType))
 }
 
 func (s *Stele) APIUpdateDns(id string, model *model.DnsModel) error {
-	return nil
+	marshal, err := json.Marshal(model)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = s.stele.Set([]byte(getApiID(model.ID)), marshal, 0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return s.stele.Set(s.getKey(model.Domain+".", model.QueryType), marshal, 0)
 }
 
 func (s *Stele) APIListDns() ([]model.DnsModel, error) {
-	return nil, nil
+	scan, err := s.stele.PrefixScan([]byte("api_dns."))
+	if err != nil {
+		return nil, err
+	}
+
+	if len(scan) == 0 {
+		return []model.DnsModel{}, nil
+	}
+
+	var models []model.DnsModel
+	for k := range scan {
+		var mod model.DnsModel
+		err := json.Unmarshal(scan[k].Val, &mod)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		models = append(models, mod)
+	}
+
+	return models, nil
+}
+
+func getApiID(id string) string {
+	return fmt.Sprintf("api_dns.%s", id)
 }
