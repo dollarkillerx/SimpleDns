@@ -73,6 +73,28 @@ type DnsModel struct {
   Addr      string        `json:"addr"`
   TTL       int           `json:"ttl"`
 }
+
+const (
+    // ResourceHeader.Type and Question.Type
+    TypeA     Type = 1
+    TypeNS    Type = 2
+    TypeCNAME Type = 5
+    TypeSOA   Type = 6
+    TypePTR   Type = 12
+    TypeMX    Type = 15
+    TypeTXT   Type = 16
+    TypeAAAA  Type = 28
+    TypeSRV   Type = 33
+    TypeOPT   Type = 41
+    
+    // Question.Type
+    TypeWKS   Type = 11
+    TypeHINFO Type = 13
+    TypeMINFO Type = 14
+    TypeAXFR  Type = 252
+    TypeALL   Type = 255
+)
+
 ```
 
 Response:
