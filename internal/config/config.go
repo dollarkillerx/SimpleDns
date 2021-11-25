@@ -35,6 +35,9 @@ func ConfInit() *Conf {
 }
 
 var base = `
+Token: token
 DNSServer: "223.5.5.5:53"
-DNSListenAddr: "0.0.0.0:53"
-Debug: false`
+DNSListenAddr: "0.0.0.0:6060"
+ApiListenAddr: "0.0.0.0:6061"
+Debug: false
+`

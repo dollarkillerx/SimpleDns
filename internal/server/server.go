@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -48,15 +49,24 @@ func (s *SimpleDns) Run() error {
 		return err
 	}
 	defer conn.Close()
-	for {
-		buf := make([]byte, 512)
-		i, addr, err := conn.ReadFromUDP(buf)
-		if err != nil {
-			log.Println(err)
-			continue
+	go func() {
+		for {
+			buf := make([]byte, 512)
+			i, addr, err := conn.ReadFromUDP(buf)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			go s.core(buf[:i], addr, conn)
 		}
-		go s.core(buf[:i], addr, conn)
+	}()
+
+	fmt.Println("Gin: ", s.conf.ApiListenAddr)
+	if err := s.app.Run(s.conf.ApiListenAddr); err != nil {
+		log.Fatalln(err)
 	}
+
+	return nil
 }
 
 func (s *SimpleDns) core(data []byte, addr *net.UDPAddr, conn *net.UDPConn) {

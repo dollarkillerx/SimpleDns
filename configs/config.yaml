@@ -1,3 +1,0 @@
-DNSServer: "223.5.5.5:53"
-ListenAddr: "127.0.0.1:8080"
-Debug: true
