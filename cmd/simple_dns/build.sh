@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source_path=./cmd/simple_dns
-go_file=main.go
+go_file=simple_dns.go
 image_name=simple_dns:latest
 
 package() {

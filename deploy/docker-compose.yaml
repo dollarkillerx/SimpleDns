@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  wormhole:
+    restart: always
+    image: dollarkiller/simple_dns:latest
+    ports:
+      - "5311:53"
+      - "6062:6061"
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./routing_table.csv:/app/routing_table.csv:ro
