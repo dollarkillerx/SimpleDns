@@ -79,6 +79,11 @@ func (s *SimpleDns) updateDns(ctx *gin.Context) {
 		return
 	}
 
+	if req.ID == "" {
+		ctx.String(400, "req id is null")
+		return
+	}
+
 	err = s.storage.APIUpdateDns(req.ID, &req)
 	if err != nil {
 		ctx.String(500, err.Error())

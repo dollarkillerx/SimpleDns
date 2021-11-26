@@ -67,6 +67,7 @@ func (s *Stele) getKey(domain string, queryType easy_dns.Type) []byte {
 
 func (s *Stele) APIStorageDns(domain string, model *model.DnsModel) error {
 	xid := xid.New().String()
+	model.ID = xid
 	marshal, err := json.Marshal(model)
 	if err != nil {
 		log.Println(err)
@@ -104,7 +105,7 @@ func (s *Stele) APIStorageDns(domain string, model *model.DnsModel) error {
 		},
 	}
 
-	bytes, err := json.Marshal(msg)
+	bytes, err := msg.Pack()
 	if err != nil {
 		log.Println(err)
 		return err
@@ -155,6 +156,10 @@ func (s *Stele) APIUpdateDns(id string, model *model.DnsModel) error {
 		return err
 	}
 
+	if model.TTL <= 0 {
+		model.TTL = 50
+	}
+
 	msg := &easy_dns.Message{
 		Answers: []easy_dns.Resource{
 			{
@@ -170,7 +175,7 @@ func (s *Stele) APIUpdateDns(id string, model *model.DnsModel) error {
 		},
 	}
 
-	bytes, err := json.Marshal(msg)
+	bytes, err := msg.Pack()
 	if err != nil {
 		log.Println(err)
 		return err
