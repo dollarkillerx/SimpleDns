@@ -1,12 +1,22 @@
 version: '3'
 
 services:
-  wormhole:
+  simple-dns:
     restart: always
     image: dollarkiller/simple_dns:latest
     ports:
-      - "5311:53"
-      - "6062:6061"
+      - "53:53/udp"
+      - "6061:6061"
     volumes:
       - ./config.yaml:/app/config.yaml:ro
       - ./routing_table.csv:/app/routing_table.csv:ro
+  simple-dns-web:
+    image: dollarkiller/simple_dns_web:latest
+    restart: always
+    ports:
+      - "9537:9537"
+    environment:
+      ADDR: "http://192.168.88.99:6061"  # 这填你外网地址
+    tty: true
+    command: /bin/sh -c "nginx && /usr/share/nginx/html/rname"
+

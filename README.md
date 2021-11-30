@@ -7,6 +7,14 @@ Simple DNS relay server with customizable routing tables
 
 web: https://github.com/XC-Zero/simple_dns
 
+![](./README/img.png)
+
+### deploy
+``` 
+docker-compose up -d
+```
+
+
 ### routing table exp:
 routing_table.csv
 ``` 
